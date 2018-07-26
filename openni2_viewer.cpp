@@ -122,7 +122,7 @@ public:
     cloud_ = cloud;
     static int count=0;
     count++;
-    if(count%30==0)
+    if(count%100==0)
     {
     cout<<"the "<<count<<" is saved"<<endl;
     sprintf(filename,"./data/%d.pcd",count);
@@ -301,52 +301,40 @@ public:
             ec.setInputCloud (cloud_abovePlane);
             ec.extract (cluster_indices);
             int i = 0;
-  	    pcl::PCDWriter writer;
-            
-for(int count=0;count<100;count++)
-{
-   double now = pcl::getTime ();
-   char *dirName=new char[20] ;    
-   int status;  
-   cout<<"the "<<count<<" is saved"<<endl;
-   sprintf(dirName,"%f",now,count);
-   status=mkdir(dirName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
+            pcl::PCDWriter writer;
+            for(int count=0;count<100;count++)
             {
-                CloudPtr cloud_cluster (new Cloud);
-                for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
-                    cloud_cluster->points.push_back (cloud_abovePlane->points[*pit]);
-                cloud_cluster->width = cloud_cluster->points.size ();
-                cloud_cluster->height = 1;
-                cloud_cluster->is_dense = true;
-                pcl::visualization::PointCloudColorHandlerRandom<PointType> random(cloud_cluster);
-
-                //std::stringstream name;
-                //name << dirName<<"Cluster" << i<<".pcd";
-    char filename[20] = {0};
-    char filename_temp[20] = {0};
-    static int i=0;
-    std::cout<<"the "<<i<<" is saved"<<std::endl;
-    std::cout<<"dirName= "<<dirName<<std::endl;
-
-   sprintf(filename_temp,"./%s/",dirName);
-   sprintf(filename,"%s%d.pcd",filename_temp,i);
-    std::cout<<"filename= "<<filename<<std::endl;
-
-
-
-
-                if (!cloud_viewer_->updatePointCloud (cloud_cluster, random, filename))
+                double now = pcl::getTime ();
+                char *dirName=new char[20] ;
+                int status;
+                cout<<"the "<<count<<" is saved"<<endl;
+                sprintf(dirName,"%f",now,count);
+                status=mkdir(dirName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
                 {
-                    cloud_viewer_->addPointCloud (cloud_cluster, random, filename);
+                    CloudPtr cloud_cluster (new Cloud);
+                    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
+                        cloud_cluster->points.push_back (cloud_abovePlane->points[*pit]);
+                    cloud_cluster->width = cloud_cluster->points.size ();
+                    cloud_cluster->height = 1;
+                    cloud_cluster->is_dense = true;
+                    pcl::visualization::PointCloudColorHandlerRandom<PointType> random(cloud_cluster);
+                    char filename[20] = {0};
+                    char filename_temp[20] = {0};
+                    static int i=0;
+                    std::cout<<"the "<<i<<" is saved"<<std::endl;
+                    std::cout<<"dirName= "<<dirName<<std::endl;
+                    sprintf(filename_temp,"./%s/",dirName);
+                    sprintf(filename,"%s%d.pcd",filename_temp,i);
+                    std::cout<<"filename= "<<filename<<std::endl;
+                    if (!cloud_viewer_->updatePointCloud (cloud_cluster, random, filename))
+                    {
+                        cloud_viewer_->addPointCloud (cloud_cluster, random, filename);
+                    }
+                    pcl::io::savePCDFile (filename, *cloud_cluster);
+                    i++;
                 }
-    		//writer.write<PointType> (name.str (), *cloud_cluster, false); //*
-    		pcl::io::savePCDFile (filename, *cloud_cluster);
-                i++;
-
             }
-}
-
       }
       if (image_mutex_.try_lock ())
       {
